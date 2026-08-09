@@ -74,5 +74,5 @@ mindgrid/
 
 ## Credits
 
-Built by Nikhil Singh, with Piyush Singh — original concept and character personalities designed as part of the MindGrid project pitch.
+Built by Nikhil Singh — original concept and character personalities designed as part of the MindGrid project pitch.
 
