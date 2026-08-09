@@ -1,67 +1,78 @@
-# MindGrid — Deploy Guide (Gemini version, free tier)
 
-## Simple bhasha mein poora process
+# MindGrid 🧠
 
-**Kya ho raha hai:** Tumhara game (React) browser mein chalta hai. Lekin AI
-se baat karne wala kaam (character ka reply banwana) ek chhoti si "function"
-(`netlify/functions/negotiate.js`) karta hai jo Netlify ke server pe chalta
-hai — isiliye tumhari API key safe rehti hai, browser mein kabhi nahi jaati.
+> "You don't place your move. You earn it."
 
-Ye function ab **Gemini** use karta hai (free), Claude nahi.
+MindGrid reimagines Tic Tac Toe as an AI negotiation game. Instead of clicking an empty square, you have to **convince** the AI character guarding that cell to let you claim it. Every cell has its own personality, memory, and mood — and losing an argument has real consequences on the board.
 
----
+## Features
 
-### Step 1 — Gemini API key lo (free, card nahi chahiye)
-1. https://aistudio.google.com pe jao
-2. Apne Google account se sign in karo
-3. Left side "Get API key" pe click karo → "Create API key"
-4. Key copy kar lo (ye baad mein lagegi)
+- **9 unique AI personalities** — Sleepy Sam, Greedy Greg, Logical Bot, Ego King, Meme Lord, Secret Agent, Chaos Kid, Professor, and Ghost — each convinced by a different kind of argument.
+- **Real tic-tac-toe rules** — standard 3-in-a-row wins, but losing a negotiation lets the guardian claim the cell for itself.
+- **Three game modes:**
+  - **Puzzle** — solo challenge against static guardians
+  - **Rival** — turn-based match against an AI opponent that picks its own cells and argues back
+  - **Local PvP** — two players, one device, alternating turns
+- **Character memory** — guardians remember how you've treated them. Insult one and they hold a grudge for the rest of the match.
+- **Random world events** — mood shifts and personality swaps keep every match unpredictable.
+- **AI-powered dialogue** — every character's reaction is generated live, so no two matches play out the same way.
 
-Free tier limits: roughly 10 requests/minute, 250 requests/din
-(`gemini-2.5-flash` model pe) — ek game session ke liye kaafi hai.
+## Tech Stack
 
-### Step 2 — GitHub pe push karo
-Terminal mein, is folder ke andar:
-```
-git init
-git add .
-git commit -m "MindGrid"
-git branch -M main
-git remote add origin https://github.com/<tumhara-username>/mindgrid.git
-git push -u origin main
-```
+- **Frontend:** React + Vite
+- **AI Backend:** Netlify Functions (serverless) proxying to the Gemini API
+- **Hosting:** Netlify
 
-### Step 3 — Netlify pe connect karo
-1. netlify.com pe jao → "Add new site" → "Import an existing project"
-2. Apna GitHub repo select karo
-3. Build settings already set hain (`netlify.toml` file mein) — bas "Deploy" dabao
+## How the AI negotiation works
 
-### Step 4 — API key Netlify mein daalo
-1. Netlify dashboard mein: Site settings → Environment variables → "Add a variable"
-2. Key ka naam: `GEMINI_API_KEY`
-3. Value: Step 1 wali key paste karo
-4. Save karo, phir Deploys → "Trigger deploy" (taaki naya key use ho)
+Every negotiation outcome (accept / partial / reject) is decided by a **deterministic local scoring engine**, not by the AI itself. The engine checks your argument against the guardian's personality, memory, and the board's current mood — then the Gemini API is only asked to *narrate* that already-decided outcome in the character's voice. This keeps the actual game logic fair, fast, and fully under the game's control.
 
-### Step 5 — Test karo
-Netlify wali live URL kholo, koi mode choose karo, kisi character se
-negotiate karke dekho. Agar hamesha generic reply aaye jaise "...fine, it's
-yours" (asli AI reply nahi), to samjho function fail ho raha hai — Netlify
-mein Site → Functions → negotiate → Logs check karo, wahan exact error dikhega
-(zyada tar galat ya missing key hoti hai).
+> **Note:** The game is fully playable even without an API key — the win/loss logic never depends on the AI. If `GEMINI_API_KEY` isn't set (or the API call fails for any reason), each character falls back to a small set of generic pre-written lines instead of crashing. To get each character's actual unique, personality-driven dialogue, set up a free Gemini API key as described below.
 
----
+## Running locally
 
-## Local pe test karna (deploy karne se pehle)
-```
+```bash
 npm install
 npx netlify dev
 ```
-Sirf `npm run dev` mat chalana — usse AI wala part kaam nahi karega kyunki
-function server nahi chal raha hoga. `netlify dev` dono ek saath chalata hai.
 
-## Note
-- GitHub Pages pe ye deploy NAHI ho sakta, kyunki wo sirf static files serve
-  karta hai, function nahi chala sakta. Netlify (ya Vercel) hi sahi jagah hai
-  is project ke liye — Bunkometer se different, jisme koi backend nahi chahiye tha.
-- Agar bahut zyada log game khelenge, free tier ki limit (250 requests/din)
-  khatam ho sakti hai — tab tak dekh lena, abhi ke liye ye kaafi hai.
+`netlify dev` runs both the Vite frontend and the serverless function together, so AI negotiation works on localhost. Plain `npm run dev` will load the UI but AI calls will fail, since there's no function server behind them.
+
+You'll need a free Gemini API key from [Google AI Studio](https://aistudio.google.com), set as an environment variable named `GEMINI_API_KEY`.
+
+## Deployment
+
+This project is built to deploy on **Netlify** (GitHub Pages won't work — it can't run the serverless function this game needs for AI calls).
+
+1. Push this repo to GitHub
+2. Import it into Netlify (build settings are already configured via `netlify.toml`)
+3. Add `GEMINI_API_KEY` under Site settings → Environment variables
+4. Trigger a deploy
+
+## Project Structure
+
+```
+mindgrid/
+├── src/
+│   ├── MindGrid.jsx      # Main game component
+│   └── main.jsx          # React entry point
+├── netlify/
+│   └── functions/
+│       └── negotiate.js  # Serverless proxy to the Gemini API
+├── index.html
+├── vite.config.js
+├── netlify.toml
+└── package.json
+```
+
+## Roadmap
+
+- [ ] Persistent match history and player profiles (database-backed)
+- [ ] Richer per-character long-term memory across turns
+- [ ] Sound effects and animated character expressions
+- [ ] Mobile app version
+
+## Credits
+
+Built by Nikhil Singh, with Piyush Singh — original concept and character personalities designed as part of the MindGrid project pitch.
+
