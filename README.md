@@ -76,3 +76,10 @@ mindgrid/
 
 Built by Nikhil Singh — original concept and character personalities designed as part of the MindGrid project pitch.
 
+---
+
+## Live Demo 🚀
+
+Try MindGrid in your browser here: [tictactoemindgrid.netlify.app](https://tictactoemindgrid.netlify.app)
+
+
